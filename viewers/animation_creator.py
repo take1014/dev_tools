@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from matplotlib import animation, rc
 import matplotlib as mpl
 import numpy as np
+from IPython.display import HTML
 
 class AnimationCreator:
     def __init__(self, config=None, limit_embed_MB=10.0, interval_msec=100, is_jupyter=False):
@@ -86,6 +87,16 @@ class AnimationCreator:
         self.anim.save(filename=output_filename, writer='ffmpeg', fps=5)  # Save with 5 frames per second
         print(f"Animation saved as '{output_filename}'.")
 
+    def show(self):
+        """Display the animation."""
+        if self.anim is None:
+            raise RuntimeError("No animation created. Call `create` before trying to display it.")
+
+        if self.is_jupyter:
+            return HTML(self.anim.to_jshtml())
+        else:
+            plt.show()
+
 if __name__ == '__main__':
     # Configuration for the animation
     config = {
@@ -115,3 +126,4 @@ if __name__ == '__main__':
     # Save the animation to a file
     output_filename = "animation.mp4"  # Output file name
     anim_creator.save(output_filename, fps=10)  # Save with 5 frames per second
+    anim_creator.show()
