@@ -32,6 +32,6 @@ if __name__ == '__main__':
       }
     }
     loader = JSONLoader()
-    json_data = loader.load_from_file('./test.json')
+    json_data = loader.load(dict_data)
     print(json_data.database.port)
     print(json_data.app.version)
