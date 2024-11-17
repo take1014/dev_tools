@@ -4,7 +4,7 @@ import matplotlib as mpl
 import numpy as np
 
 class AnimationCreator:
-    def __init__(self, config=None, limit_embed_MB=10.0, interval_msec=100):
+    def __init__(self, config=None, limit_embed_MB=10.0, interval_msec=100, is_jupyter=False):
         if not config:
             raise ValueError(
                 "config must be provided as a dictionary with keys: 'nrows', 'ncols', 'figsize', and optionally 'cmap'."
@@ -29,6 +29,9 @@ class AnimationCreator:
 
         self.fig, self.axes = plt.subplots(self.config['nrows'], self.config['ncols'], figsize=self.config['figsize'])
         self.axes = np.array(self.axes).flatten()  # Ensure axes are a flat array for iteration
+        self.is_jupyter = is_jupyter
+        if self.is_jupyter:
+            plt.close(self.fig)  # Avoid duplicate rendering in Jupyter
         self.anim = None
 
     def create(self, images_list: list, titles=None, main_title='Animation') -> animation.FuncAnimation:
@@ -68,7 +71,8 @@ class AnimationCreator:
             self.fig, update, frames=len(images_list[0]), interval=self.interval_msec, blit=False
         )
 
-        plt.close(self.fig)  # Avoid duplicate rendering in Jupyter
+        if self.is_jupyter:
+            plt.close(self.fig)  # Avoid duplicate rendering in Jupyter
 
     def get_animation(self):
         """Getter for the created animation."""
