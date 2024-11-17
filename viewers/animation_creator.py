@@ -29,8 +29,9 @@ class AnimationCreator:
 
         self.fig, self.axes = plt.subplots(self.config['nrows'], self.config['ncols'], figsize=self.config['figsize'])
         self.axes = np.array(self.axes).flatten()  # Ensure axes are a flat array for iteration
+        self.anim = None
 
-    def __call__(self, images_list: list, titles=None, main_title='Animation') -> animation.FuncAnimation:
+    def create(self, images_list: list, titles=None, main_title='Animation') -> animation.FuncAnimation:
         if len(images_list) != len(self.axes):
             raise ValueError(
                 f"Number of image sets ({len(images_list)}) must match the number of subplots ({len(self.axes)})."
@@ -63,9 +64,50 @@ class AnimationCreator:
             return artists + [frame_number_text]
 
         # Create animation
-        anim = animation.FuncAnimation(
+        self.anim = animation.FuncAnimation(
             self.fig, update, frames=len(images_list[0]), interval=self.interval_msec, blit=False
         )
 
         plt.close(self.fig)  # Avoid duplicate rendering in Jupyter
-        return anim
+
+    def get_animation(self):
+        """Getter for the created animation."""
+        if self.anim is None:
+            raise RuntimeError("No animation has been created. Call `create` first.")
+        return self.anim
+
+    def save(self, output_filename=None, fps=10):
+        if self.anim is None:
+            raise RuntimeError("No animation created. Call `create` before saving.")
+        self.anim.save(filename=output_filename, writer='ffmpeg', fps=5)  # Save with 5 frames per second
+        print(f"Animation saved as '{output_filename}'.")
+
+if __name__ == '__main__':
+    # Configuration for the animation
+    config = {
+        'nrows': 2,       # 2 rows
+        'ncols': 2,       # 2 columns
+        'figsize': [8, 8], # Size of the figure
+        'cmap': 'plasma'  # Colormap (optional)
+    }
+
+    # Create an instance of AnimationCreator
+    anim_creator = AnimationCreator(config=config, limit_embed_MB=20.0, interval_msec=200)
+
+    # Generate random data (4 frames for each subplot)
+    images_list = [
+        [np.random.rand(10, 10) for _ in range(20)],  # Data for subplot 1
+        [np.random.rand(10, 10) for _ in range(20)],  # Data for subplot 2
+        [np.random.rand(10, 10) for _ in range(20)],  # Data for subplot 3
+        [np.random.rand(10, 10) for _ in range(20)]   # Data for subplot 4
+    ]
+
+    # Titles for each subplot
+    titles = ['Plot 1', 'Plot 2', 'Plot 3', 'Plot 4']
+
+    # Create the animation
+    anim_creator.create(images_list=images_list, titles=titles, main_title="Sample Animation")
+
+    # Save the animation to a file
+    output_filename = "animation.mp4"  # Output file name
+    anim_creator.save(output_filename, fps=10)  # Save with 5 frames per second
