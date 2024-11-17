@@ -42,17 +42,17 @@ class CSVReader:
         self._exists_dataframe()
         return self.df.index.values
 
-    def get_column_values(self, column_name=None) -> dict:
+    def get_column_values(self, column_name=None) -> np.ndarray:
         self._exists_dataframe()
         if column_name in self.df.columns:
-            return {column_name: self.df[column_name].tolist()}
+            return self.df[column_name].values
         raise KeyError(f"Column '{column_name}' does not exist in the DataFrame.")
 
-    def get_row_values(self, start_index=0, end_index=0) -> list:
+    def get_row_values(self, start_index=0, end_index=0) -> np.ndarray:
         self._exists_dataframe()
         end_index = start_index+1 if start_index > end_index else end_index
         if start_index in self.df.index and end_index in self.df.index:
-            return self.df.iloc[start_index:end_index].values.tolist()
+            return self.df.iloc[start_index:end_index].values
         raise KeyError(f"Row index '{index}' does not exist in the DataFrame.")
 
 if __name__ == '__main__':
@@ -61,5 +61,5 @@ if __name__ == '__main__':
     print(reader.get_column_names())
     print(reader.get_index_names())
     print(reader.get_column_values(column_name='Survived'))
-    print(reader.get_row_values(start_index=0, end_index=1))
+    print(reader.get_row_values(start_index=0, end_index=10))
 
